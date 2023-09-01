@@ -14,10 +14,10 @@ class Bolt6(LeggedRobot):
         self.control_tick = torch.zeros(
             self.num_envs, 1, dtype=torch.int,
             device=self.device, requires_grad=False)
- 
+
         self.ext_forces = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
         self.ext_torques = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
-       
+      
 
     def compute_observations(self):
         """ Computes observations
@@ -27,15 +27,15 @@ class Bolt6(LeggedRobot):
         
         self.obs_buf = torch.cat((
             self.contacts,
-            self.base_z,  
+            self.base_z,
             self.base_lin_vel * self.obs_scales.lin_vel,
-            self.base_ang_vel  * self.obs_scales.ang_vel,
+            self.base_ang_vel * self.obs_scales.ang_vel,
             self.projected_gravity,
             self.commands[:, :3] * self.commands_scale,
             (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
             self.dof_vel * self.obs_scales.dof_vel,
             self.actions
-        ),dim=-1)
+        ), dim=-1)
         
         # add noise if needed
         if self.add_noise:
@@ -54,12 +54,12 @@ class Bolt6(LeggedRobot):
         # Reward long steps
         # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
         contacts = self.contact_forces[:, self.feet_indices, 2] > 0.001
-        single_contact = torch.sum(1.*contacts, dim=1) >0
-        contact_filt = torch.logical_or(contacts, self.last_contacts) 
+        single_contact = torch.sum(1.*contacts, dim=1) > 0
+        contact_filt = torch.logical_or(contacts, self.last_contacts)
         self.last_contacts = contacts
         first_contact = (self.feet_air_time > 0.) * contact_filt
         self.feet_air_time += self.dt
-        rew_airTime = torch.sum( torch.clip(self.feet_air_time - 0.3, min=0.0, max=0.7) * first_contact, dim=1) # reward only on first contact with the ground
+        rew_airTime = torch.sum(torch.clip(self.feet_air_time - 0.3, min=0.0, max=0.7) * first_contact, dim=1) # reward only on first contact with the ground
         rew_airTime *= torch.norm(self.commands[:, :3], dim=1) > 0.1 #no reward for zero command
         rew_airTime *= single_contact #no reward for flying or double support
         self.feet_air_time *= ~contact_filt
@@ -263,6 +263,8 @@ class Bolt6(LeggedRobot):
         delta_phi = ~self.reset_buf \
             * (self._reward_feet_air_time() - self.rwd_feetAirTimePrev)
         return delta_phi / self.dt
+    
+        
 
     def check_termination(self):
         """ Check if environments need to be reset

@@ -47,6 +47,10 @@ from .bolt10.bolt10_config import Bolt10Cfg, Bolt10CfgPPO
 from .bolt12.bolt12 import Bolt12
 from .bolt12.bolt12_config import Bolt12Cfg, Bolt12CfgPPO
 
+#rui
+from .bolt6_getup.bolt6_getup import Bolt6_Getup
+from .bolt6_getup.bolt6_getup_config import Bolt6_GetupCfg, Bolt6_GetupCfgPPO
+
 import os
 
 from legged_gym.utils.task_registry import task_registry
@@ -60,4 +64,7 @@ task_registry.register( "tocabi", Tocabi, TocabiRoughCfg(), TocabiRoughCfgPPO() 
 task_registry.register( "bolt6", Bolt6, Bolt6Cfg(), Bolt6CfgPPO() )
 task_registry.register( "bolt10", Bolt10, Bolt10Cfg(), Bolt10CfgPPO() )
 task_registry.register( "bolt12", Bolt12, Bolt12Cfg(), Bolt12CfgPPO() )
+
+#rui getup
+task_registry.register( "bolt6_getup", Bolt6_Getup, Bolt6_GetupCfg(), Bolt6_GetupCfgPPO() )
 

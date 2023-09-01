@@ -1,0 +1,147 @@
+{
+    "os": "Linux-5.15.0-82-generic-x86_64-with-glibc2.17",
+    "python": "3.8.16",
+    "heartbeatAt": "2023-09-01T05:33:07.507460",
+    "startedAt": "2023-09-01T05:33:06.746525",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--task=bolt6_getup"
+    ],
+    "state": "running",
+    "program": "scripts/train.py",
+    "codePath": "legged_gym/scripts/train.py",
+    "git": {
+        "remote": "https://github.com/JunhyeokRuiyi/legged_gym_tocabi.git",
+        "commit": "09acac5201b30937a5bc9b220ff1516b502588d9"
+    },
+    "email": "threeman1@snu.ac.kr",
+    "root": "/home/dyros/bolt_test_ws6/legged_gym_tocabi",
+    "host": "ruiyi",
+    "username": "dyros",
+    "executable": "/home/dyros/anaconda3/envs/bolt/bin/python",
+    "cpu_count": 12,
+    "cpu_count_logical": 20,
+    "cpu_freq": {
+        "current": 3845.7172000000005,
+        "min": 800.0,
+        "max": 4700.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4697.642,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4728.66,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4725.989,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4691.333,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4691.372,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4737.203,
+            "min": 800.0,
+            "max": 5000.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 5000.0
+        },
+        {
+            "current": 4707.663,
+            "min": 800.0,
+            "max": 5000.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 5000.0
+        },
+        {
+            "current": 4683.382,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4705.843,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 4712.009,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 4900.0
+        },
+        {
+            "current": 3655.554,
+            "min": 800.0,
+            "max": 3800.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 3800.0
+        },
+        {
+            "current": 3600.0,
+            "min": 800.0,
+            "max": 3800.0
+        },
+        {
+            "current": 3601.369,
+            "min": 800.0,
+            "max": 3800.0
+        }
+    ],
+    "disk": {
+        "total": 3665.956069946289,
+        "used": 397.57936096191406
+    },
+    "gpu": "NVIDIA GeForce RTX 2080 Ti",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 2080 Ti",
+            "memory_total": 11811160064
+        }
+    ],
+    "memory": {
+        "total": 31.08348846435547
+    }
+}
