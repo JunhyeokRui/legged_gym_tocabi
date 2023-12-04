@@ -17,7 +17,6 @@ class Bolt6(LeggedRobot):
 
         self.ext_forces = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
         self.ext_torques = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
-      
 
     def compute_observations(self):
         """ Computes observations
@@ -77,12 +76,6 @@ class Bolt6(LeggedRobot):
     def _reward_action_rate(self):
         # Penalize changes in actions
         return torch.mean(torch.square( (self.last_actions - self.actions)/self.dt ), dim=1)
-    
-    # def _reward_action_rate(self):
-    #     # Penalize changes in actions
-    #     action_rate = torch.sum(torch.square( (self.last_actions - self.actions) ), dim=1)
-    #     # print("action_rate: ", action_rate[0])
-    #     return torch.exp(-action_rate/self.cfg.rewards.action_rate_sigma)
 
     def _reward_orientation(self):
         # Penalize non flat base orientation
@@ -96,7 +89,6 @@ class Bolt6(LeggedRobot):
 
     def _reward_energy(self):
         #veltorque, value  scale or sum
-              
         if self.cfg.rewards.positive_energy_reward:
             positive_energy=(self.torques*self.dof_vel).clip(min=0.)
             positive_energy_square = torch.mean(torch.square(positive_energy), dim=1)
@@ -136,18 +128,15 @@ class Bolt6(LeggedRobot):
         return error/2
 
     # * Potential-based rewards * #
-
     def pre_physics_step(self):
         self.rwd_oriPrev = self._reward_orientation()
         self.rwd_baseHeightPrev = self._reward_base_height()
         self.rwd_jointRegPrev = self._reward_joint_regularization()
         self.rwd_energyPrev = self._reward_energy()
         self.rwd_actionRatePrev = self._reward_action_rate()
-
         self.rwd_standStillPrev = self._reward_stand_still()
         self.rwd_noFlyPrev = self._reward_no_fly()
         self.rwd_feetAirTimePrev = self._reward_feet_air_time()
-
 
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
@@ -207,7 +196,6 @@ class Bolt6(LeggedRobot):
         if self.cfg.domain_rand.push_robots and  (self.common_step_counter % self.cfg.domain_rand.push_interval == 0):
             self._push_robots()
 
-        
     def update_command_curriculum(self, env_ids):
         """ Implements a curriculum of increasing commands
 
@@ -222,7 +210,6 @@ class Bolt6(LeggedRobot):
         if torch.mean(self.episode_sums["tracking_ang_vel"][env_ids]) / self.max_episode_length > 0.50 * self.reward_scales["tracking_ang_vel"]:
             self.command_ranges["ang_vel_yaw"][0] = np.clip(self.command_ranges["ang_vel_yaw"][0] - 0.05, -self.cfg.commands.max_curriculum, 0.)
             self.command_ranges["ang_vel_yaw"][1] = np.clip(self.command_ranges["ang_vel_yaw"][1] + 0.05, 0., self.cfg.commands.max_curriculum)
-
 
     def _reward_ori_pb(self):
         delta_phi = ~self.reset_buf \
@@ -264,8 +251,6 @@ class Bolt6(LeggedRobot):
             * (self._reward_feet_air_time() - self.rwd_feetAirTimePrev)
         return delta_phi / self.dt
     
-        
-
     def check_termination(self):
         """ Check if environments need to be reset
         """
@@ -281,7 +266,6 @@ class Bolt6(LeggedRobot):
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
-
 
     # ##################### HELPER FUNCTIONS ################################## #
 
