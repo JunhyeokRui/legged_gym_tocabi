@@ -42,15 +42,15 @@ import torch
 def play(args):
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     # override some parameters for testing
-    env_cfg.env.num_envs = min(env_cfg.env.num_envs, 10)
+    env_cfg.env.num_envs = min(env_cfg.env.num_envs, 25)
     env_cfg.terrain.num_rows = 5
     env_cfg.terrain.num_cols = 5
     env_cfg.terrain.curriculum = False
     env_cfg.noise.add_noise = False
     env_cfg.domain_rand.randomize_friction = False
     env_cfg.domain_rand.push_robots = False
-    env_cfg.domain_rand.ext_force_robots = True
-    env_cfg.domain_rand.ext_force_vector_6d = [ -20, 0, 0, 0, 0, 0]
+    env_cfg.domain_rand.ext_force_robots = False
+    env_cfg.domain_rand.ext_force_vector_6d = [ -20, 0, 0.0, 0, 0, 0]
     env_cfg.domain_rand.ext_force_start_time = 3.0
     env_cfg.domain_rand.ext_force_duration = 0.2
 
@@ -59,6 +59,16 @@ def play(args):
     env_cfg.commands.ranges.lin_vel_y = [0.00, 0.00]
     env_cfg.commands.ranges.ang_vel_yaw = [-0.0, -0.0]
     env_cfg.commands.ranges.heading = [0, 0]
+    """
+    lin_vel_x = [-1.0, 1.0] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
+    lin_vel_y = [-1.0, 1.0]   # min max [m/s]
+    ang_vel_yaw = [-1, 1]    # min max [rad/s]
+    heading = [-3.14, 3.14]
+    """
+    env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
+    env_cfg.commands.ranges.lin_vel_y = [-1.0, 1.0]
+    env_cfg.commands.ranges.ang_vel_yaw = [-1, 1]
+    env_cfg.commands.ranges.heading = [-3.14, 3.14]
 
     # env_cfg.init_state.pos = [0.0, 0.0, 1.2] # x,y,z [m]
     # prepare environment
@@ -78,7 +88,7 @@ def play(args):
     logger = Logger(env.dt)
     robot_index = 0 # which robot i s used for logging
     joint_index = 3 # which joint is used for logging
-    stop_state_log = 400 # number of steps before plotting states
+    stop_state_log = 200 # number of steps before plotting states
     stop_rew_log = env.max_episode_length + 1 # number of steps before print average episode rewards
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
     camera_vel = np.array([1., 1., 0.])
