@@ -169,6 +169,8 @@ class Bolt6_Getup(LeggedRobot):
 
     #     return upright
     
+
+    
     def _reward_standing(self):
         # Reward tracking specified base height
         standing = self.root_states[:, 2].unsqueeze(1)
@@ -179,13 +181,6 @@ class Bolt6_Getup(LeggedRobot):
     def _reward_dont_move(self):
         
         return torch.sum(torch.square(self.base_lin_vel[:, :2]), dim=1)
-    
-    # def _reward_closer_feet(self):
-    #     left_feet_pos = 
-    #     right_feet_pos =
-    #     feet_distance = torch.pow
-    #     feet_reward = 
-    #     return 
         
     def _reward_upright(self):
         # Penalize non flat base orientation
@@ -346,14 +341,18 @@ class Bolt6_Getup(LeggedRobot):
         """ Check if environments need to be reset
         """
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
+        
+        self.reset_buf |= torch.all(torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) < 0.001, dim=1)
+        print("feet_contacts")
+        print(self.contact_forces[:, self.feet_indices, :])
         # orientation x
-        self.reset_buf |= torch.any(
-          torch.abs(self.projected_gravity[:, 0:1]) > 0.7, dim=1)
+        # self.reset_buf |= torch.any(
+        #   torch.abs(self.projected_gravity[:, 0:1]) > 0.7, dim=1)
         # orientation y
-        self.reset_buf |= torch.any(
-          torch.abs(self.projected_gravity[:, 1:2]) > 0.7, dim=1)
+        # self.reset_buf |= torch.any(
+        #   torch.abs(self.projected_gravity[:, 1:2]) > 0.7, dim=1)
         # base height z
-        self.reset_buf |= torch.any(self.base_pos[:, 2:3] < 0.15, dim=1)
+        # self.reset_buf |= torch.any(self.base_pos[:, 2:3] < 0.15, dim=1)
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf

@@ -74,7 +74,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
         num_rows= 10 # number of terrain rows (levels)
         num_cols = 20 # number of terrain cols (types)
         # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete] # Rui
-        terrain_proportions = [1.0, 0.0, 0.0, 0.0, 0.0] # Rui
+        terrain_proportions = [0.0, 1.0, 0.0, 0.0, 0.0] # Rui
         # trimesh only:
         slope_treshold = 0.75 # slopes above this threshold will be corrected to vertical surfaces # Rui
 
@@ -97,6 +97,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
         rot = [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+        
         default_joint_angles = { # = target angles [rad] when action = 0.0
             'FL_HAA': 0.,
             # 'hip_rotation_left': 0.,
@@ -160,6 +161,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
         # penalize_contacts_on = ['bolt_lower_leg_right_side', 'bolt_body', 'bolt_hip_fe_left_side', 'bolt_hip_fe_right_side', ' bolt_lower_leg_left_side', 'bolt_shoulder_fe_left_side', 'bolt_shoulder_fe_right_side', 'bolt_trunk', 'bolt_upper_leg_left_side', 'bolt_upper_leg_right_side']
         # penalize_contacts_on = ['base_link', 'FR_SHOULDER', 'FL_SHOULDER', 'FR_LOWER_LEG', 'FL_LOWER_LEG']
         terminate_after_contacts_on = ['base_link', 'FR_SHOULDER', 'FL_SHOULDER']
+        # terminate_after_contacts_on = []
         
         
         disable_gravity = False
@@ -234,7 +236,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
             # PBRS rewards
             ori_pb = 5.0
             baseHeight_pb = 2.0
-            jointReg_pb = 0.0
+            jointReg_pb = 1
             # energy_pb = 1.0
             action_rate_pb = 0.0
 
@@ -341,8 +343,8 @@ class Bolt6CfgPPO( LeggedRobotCfgPPO ):
 
         # logging
         save_interval = 50 # check for potential saves every this many iterations
-        experiment_name = 'bolt6_test'
-        run_name = 'bolt6_test'
+        experiment_name = 'bolt6_plane'
+        run_name = 'bolt6_plane'
         # load and resume
         resume = False
         load_run = -1 # -1 = last run

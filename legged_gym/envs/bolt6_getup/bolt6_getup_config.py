@@ -138,7 +138,7 @@ class Bolt6_GetupCfg(LeggedRobotCfg):
         decimation = 10
 
     class asset( LeggedRobotCfg.asset ):
-        file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/bolt6/urdf/bolt6.urdf'
+        file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/bolt6/urdf/bolt6_getup.urdf'
         name = "bolt6_getup"
         foot_name = 'LOWER_LEG'
         penalize_contacts_on = []
@@ -335,8 +335,8 @@ class Bolt6_GetupCfgPPO(LeggedRobotCfgPPO):
 
         # logging
         save_interval = 50 # check for potential saves every this many iterations
-        experiment_name = 'bolt6_test'
-        run_name = 'bolt6_test'
+        experiment_name = 'bolt6_getup'
+        run_name = 'bolt6_getup'
         # load and resume
         resume = False
         load_run = -1 # -1 = last run

@@ -262,7 +262,7 @@ class Bolt6(LeggedRobot):
         self.reset_buf |= torch.any(
           torch.abs(self.projected_gravity[:, 1:2]) > 0.7, dim=1)
         # base height z
-        self.reset_buf |= torch.any(self.base_pos[:, 2:3] < 0.15, dim=1)
+        # self.reset_buf |= torch.any(self.base_pos[:, 2:3] < 0.15, dim=1)
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
