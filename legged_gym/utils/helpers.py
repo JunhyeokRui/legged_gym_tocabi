@@ -183,11 +183,36 @@ def export_policy_as_jit(actor_critic, path):
         exporter = PolicyExporterLSTM(actor_critic)
         exporter.export(path)
     else: 
-        os.makedirs(path, exist_ok=True)
-        path = os.path.join(path, 'policy_1.pt')
-        model = copy.deepcopy(actor_critic.actor).to('cpu')
-        traced_script_module = torch.jit.script(model)
-        traced_script_module.save(path)
+        # os.makedirs(path, exist_ok=True)
+        # path = os.path.join(path, 'policy_1.pt')
+        # model = copy.deepcopy(actor_critic.actor).to('cpu')
+        # traced_script_module = torch.jit.script(model)
+        # traced_script_module.save(path)
+        
+        if hasattr(actor_critic, 'actor') and hasattr(actor_critic, 'critic'):
+            # Create the directory if it does not exist
+            os.makedirs(path, exist_ok=True)
+
+            # Set the paths for the exported models
+            actor_path = os.path.join(path, 'actor_model.pt')
+            critic_path = os.path.join(path, 'critic_model.pt')
+
+            # Deep copy the actor model and move it to CPU
+            actor_model = copy.deepcopy(actor_critic.actor).to('cpu')
+            # Use JIT to script the actor model
+            actor_traced_script_module = torch.jit.script(actor_model)
+            # Save the scripted actor model
+            actor_traced_script_module.save(actor_path)
+
+            # Deep copy the critic model and move it to CPU
+            critic_model = copy.deepcopy(actor_critic.critic).to('cpu')
+            # Use JIT to script the critic model
+            critic_traced_script_module = torch.jit.script(critic_model)
+            # Save the scripted critic model
+            critic_traced_script_module.save(critic_path)
+
+        else:
+            print("The actor_critic model does not have both actor and critic components.")
 
 
 class PolicyExporterLSTM(torch.nn.Module):
