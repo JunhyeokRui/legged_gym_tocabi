@@ -54,7 +54,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
         episode_length_s = 10 # episode length in seconds
 
     class terrain( LeggedRobotCfg.terrain):
-        mesh_type = 'trimesh' # Rui
+        mesh_type = 'plane' # Rui
         horizontal_scale = 0.1 # [m]
         vertical_scale = 0.001 # [m] Rui
         border_size = 25 # [m]

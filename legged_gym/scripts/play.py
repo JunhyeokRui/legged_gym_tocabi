@@ -82,8 +82,34 @@ def play(args):
     # export policy as a jit module (used to run it from C++)
     if EXPORT_POLICY:
         path = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'policies')
+        
         export_policy_as_jit(ppo_runner.alg.actor_critic, path)
         print('Exported policy as jit script to: ', path)
+        
+        
+        model = torch.jit.load(path+'/policy_1.pt')
+        
+        # Directory to save the W/B
+        save_dir = 'model_parameters'
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Iterate over each parameter
+        for name, param in model.named_parameters():
+            # Seperate file for each parameter
+            file_name = f"{name.replace('.', '_')}.txt"
+            file_path = os.path.join(save_dir, file_name)
+            
+            # Write parameter data to file
+            with open(file_path, 'w') as file:
+                weights = param.detach().cpu().numpy()
+                if weights.ndim > 1:  # Handling multidimensional parameters
+                    for row in weights:
+                        # np.savetxt(file, row, fmt='%.6f')
+                        np.savetxt(file, row)
+                else:
+                    # np.savetxt(file, weights, fmt='%.6f')
+                    np.savetxt(file, weights)
+                
 
     logger = Logger(env.dt)
     robot_index = 0 # which robot i s used for logging
@@ -135,7 +161,7 @@ def play(args):
             logger.print_rewards()
 
 if __name__ == '__main__':
-    EXPORT_POLICY = False
+    EXPORT_POLICY = True
     RECORD_FRAMES = False
     MOVE_CAMERA = False
     args = get_args()
