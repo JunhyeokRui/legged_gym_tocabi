@@ -207,11 +207,11 @@ class TocabiRoughCfg( LeggedRobotCfg ):
             energy = 0.0 # 0.01
             torques = -1.e-6
             dof_vel = -0.0
-            dof_acc = -0
+            dof_acc = -0 
             action_rate = -2e-4 # -0.000001
 
             # walking specific rewards
-            feet_air_time = 100.
+            feet_air_time = 140.
             collision = -0.
             feet_stumble = -0.0 
             stand_still = 3.0
@@ -224,7 +224,7 @@ class TocabiRoughCfg( LeggedRobotCfg ):
             dof_pos_limits = -10.            
             
             # DRS
-            orientation = 0.0 # Rui
+            orientation = 0.0 
             base_height = 0.0
             joint_regularization = 0.0
 
@@ -235,7 +235,8 @@ class TocabiRoughCfg( LeggedRobotCfg ):
             energy_pb = 0.01
             action_rate_pb = 0.0
             feet_contact_forces_pb = 10.0
-            feet_ori_pb = 1.0
+            feet_ori_pb = 2.0
+            # _pen_dof_jerk_pb = 0.0
 
         only_positive_rewards = False # if true negative total rewards are clipped at zero (avoids early termination problems)
         
@@ -255,7 +256,7 @@ class TocabiRoughCfg( LeggedRobotCfg ):
 
     class normalization:
         class obs_scales:
-            lin_vel = 1.0 # Rui
+            lin_vel = 1.0 
             ang_vel = 0.25
             dof_pos = 1.0
             dof_vel = 0.05

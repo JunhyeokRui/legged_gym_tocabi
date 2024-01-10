@@ -48,6 +48,10 @@ class Tocabi(LeggedRobot):
  
         self.ext_forces = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
         self.ext_torques = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
+        
+        # #rui - acc (self.last_dof_vel - self.dof_vel) / self.dt
+        # self.dof_acc = (self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 1] - self.last_dof_vel) / self.dt
+        # self.last_dof_acc = torch.zeros_like(self.dof_acc) 
        
 
     def compute_observations(self):
@@ -76,6 +80,7 @@ class Tocabi(LeggedRobot):
 
     def _custom_reset(self, env_ids):
         self.control_tick[env_ids, 0] = 0
+        # self.last_dof_acc[env_ids] = 0 #rui - custom
 
     def _reward_no_fly(self):
         
@@ -186,6 +191,10 @@ class Tocabi(LeggedRobot):
         foot_orientation_error += torch.sum(torch.square(rfeet_projectec_gravity[:, :2]), dim=1)
         # print("orientation_error: ", orientation_error[0])
         return torch.exp(-foot_orientation_error/self.cfg.rewards.orientation_sigma)
+    
+    # #rui - reward_smooth_motion
+    # def _reward_penalize_dof_jerk(self):
+    #     return -torch.sum(torch.square((self.last_dof_acc - self.dof_acc) / self.dt), dim=1)
 
     # * Potential-based rewards * #
 
@@ -197,6 +206,7 @@ class Tocabi(LeggedRobot):
         self.rwd_actionRatePrev = self._reward_action_rate()
         self.rwd_feetContactForcesPrev = self._reward_feet_contact_forces()
         self.rwd_feetOriPrev = self._reward_foot_orientation_regularization()
+        # self.rwd_penDofJerk = self._reward_penalize_dof_jerk() #rui - custom
 
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
@@ -308,7 +318,17 @@ class Tocabi(LeggedRobot):
         delta_phi = ~self.reset_buf \
             * (self._reward_foot_orientation_regularization() - self.rwd_feetOriPrev)
         return delta_phi / self.dt
+    
+    # #rui - custom
+    # def _reward_pen_dof_jerk_pb(self):
+    #     delta_phi = ~self.reset_buf \
+    #         * (self._reward_penalize_dof_jerk() - self.rwd_penDofJerk)
+    #     return delta_phi / self.dt
 
+    # #rui - custom
+    # def _custom_post_physics_step(self):
+    #     self.last_dof_acc[:] = self.dof_acc[:]
+    
     def check_termination(self):
         """ Check if environments need to be reset
         """
@@ -325,7 +345,7 @@ class Tocabi(LeggedRobot):
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
-
+        
 
     # ##################### HELPER FUNCTIONS ################################## #
 
