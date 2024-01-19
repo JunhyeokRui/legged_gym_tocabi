@@ -140,7 +140,10 @@ def play(args):
     img_idx = 0
 
     for i in range(10*int(env.max_episode_length)):
-        actions = policy(obs.detach())
+        print("obs size : ", obs.size())
+        print("obs : ", obs[1, :].detach())
+        print("obs type : ", type(obs.detach()))
+        actions = policy(obs.detach())        
         obs, _, rews, dones, infos = env.step(actions.detach())
         if RECORD_FRAMES:
             if i % 2:
