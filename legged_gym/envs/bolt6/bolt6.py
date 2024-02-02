@@ -144,7 +144,9 @@ class Bolt6(LeggedRobot):
 
         Args:
             actions (torch.Tensor): Tensor of shape (num_envs, num_actions_per_env)
-        """
+        """        
+        print("self.sim_params.dt: ", self.sim_params.dt)
+        print("self.dt: ", self.dt)
         clip_actions = self.cfg.normalization.clip_actions
         self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
         self.pre_physics_step()

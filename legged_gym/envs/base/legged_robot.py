@@ -529,9 +529,21 @@ class LeggedRobot(BaseTask):
         self.commands_scale = torch.tensor([self.obs_scales.lin_vel, self.obs_scales.lin_vel, self.obs_scales.ang_vel], device=self.device, requires_grad=False,) # TODO change this
         self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float, device=self.device, requires_grad=False)
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device, requires_grad=False)
-        self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
-        self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
-        self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+        self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10]) #rui -[7:10] linear velocity
+        self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13]) #rui -[7:10] angular velocity
+        print("self.base_quat: ", self.base_quat[1, :])
+        self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec) #rui - self.gravity_vec -> 0, 0, -1
+
+#rui - for debug start
+        # value = [-0.329, 0.313, 0.845, -0.282]
+
+        # self.quat_example2 = torch.tensor(value).unsqueeze(0).repeat(25, 1).to(self.device)
+        # print(self.quat_example2.shape, self.quat_example2)
+
+        # self.tester_gravity = quat_rotate_inverse(self.quat_example2, self.gravity_vec)
+        # print("self.tester_gravity : ", self.tester_gravity)
+#rui - for debug end
+
         if self.cfg.terrain.measure_heights:
             self.height_points = self._init_height_points()
         self.measured_heights = 0

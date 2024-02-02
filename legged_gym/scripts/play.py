@@ -38,7 +38,32 @@ from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Log
 import numpy as np
 import torch
 
+#rui - 
+import csv
+import copy
 
+def tensor_to_list(tensor):
+    """ Convert a tensor to a list of lists if it's 2D, or a list if it's 1D. """
+    return tensor.detach().cpu().numpy().tolist()
+
+def write_tensors_to_csv(input_tensor, output_tensor, filename, filename2):
+    input_data = tensor_to_list(input_tensor)
+    output_data = tensor_to_list(output_tensor)
+
+    # Check if data is 2D or 1D and format accordingly
+    input_data_formatted = [input_data] if isinstance(input_data[0], float) else input_data
+    output_data_formatted = [output_data] if isinstance(output_data[0], float) else output_data
+
+    # Append input data to CSV
+    with open(filename, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(input_data_formatted)
+
+    # Append output data to CSV
+    with open(filename2, mode='a', newline='', encoding='utf-8') as file2:
+        writer = csv.writer(file2)
+        writer.writerows(output_data_formatted)
+            
 def play(args):
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     # override some parameters for testing
@@ -127,8 +152,7 @@ def play(args):
                 else:
                     # np.savetxt(file, weights, fmt='%.6f')
                     np.savetxt(file, weights)
-                
-
+    
     logger = Logger(env.dt)
     robot_index = 0 # which robot i s used for logging
     joint_index = 3 # which joint is used for logging
@@ -138,12 +162,40 @@ def play(args):
     camera_vel = np.array([1., 1., 0.])
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
+    
+    
+
+    
+
+    
+
 
     for i in range(10*int(env.max_episode_length)):
-        print("obs size : ", obs.size())
-        print("obs : ", obs[1, :].detach())
-        print("obs type : ", type(obs.detach()))
-        actions = policy(obs.detach())        
+        # print("obs size : ", obs.size())
+        # print("obs : ", obs[1, :].detach())
+        # print("obs type : ", type(obs.detach()))
+        obs2 = copy.deepcopy(obs)
+
+        # print("obs : ", obs[1, :])
+        actions = policy(obs.detach()) 
+
+#rui - debug start
+        # Desired value for each tensor element
+        value = [0, 0, 0, 0, 0, 0]
+
+        # Creating a tensor of size 25 x 4 with the specified value
+        # Using repeat to create the tensor with repeated values
+        tensor = torch.tensor(value).unsqueeze(0).repeat(25, 1)
+        # actions = tensor
+#rui - debug end
+        # print("actions : ", actions[1, :])
+        #rui - 
+        # write_tensors_to_csv(obs2[1,:], actions[1,:], 'policy_input.csv', 'policy_output.csv')     
+        
+        # print("actions : ", actions.size())
+        # print("actions : ", actions[1, :].detach())
+        # print("actions type : ", type(actions.detach()))
+        
         obs, _, rews, dones, infos = env.step(actions.detach())
         if RECORD_FRAMES:
             if i % 2:

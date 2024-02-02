@@ -237,7 +237,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
             ori_pb = 5.0
             baseHeight_pb = 2.0
             jointReg_pb = 1
-            # energy_pb = 1.0
+            energy_pb = 1.0
             action_rate_pb = 0.0
 
             stand_still_pb = 1.0
