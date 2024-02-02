@@ -57,3 +57,10 @@ runs
 # other
 *.egg-info
 __pycache__
+TEST.m
+policy_input.csv
+policy_input_2.csv
+policy_input_3.csv
+policy_output.csv
+policy_output_2.csv
+policy_output_3.csv
