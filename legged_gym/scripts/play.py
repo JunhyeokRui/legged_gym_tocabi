@@ -67,7 +67,7 @@ def write_tensors_to_csv(input_tensor, output_tensor, filename, filename2):
 def play(args):
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     # override some parameters for testing
-    env_cfg.env.num_envs = min(env_cfg.env.num_envs, 25)
+    env_cfg.env.num_envs = min(env_cfg.env.num_envs, 1)
     env_cfg.terrain.num_rows = 5
     env_cfg.terrain.num_cols = 5
     env_cfg.terrain.curriculum = False
@@ -90,10 +90,10 @@ def play(args):
     ang_vel_yaw = [-1, 1]    # min max [rad/s]
     heading = [-3.14, 3.14]
     """
-    env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
-    env_cfg.commands.ranges.lin_vel_y = [-1.0, 1.0]
-    env_cfg.commands.ranges.ang_vel_yaw = [-1, 1]
-    env_cfg.commands.ranges.heading = [-3.14, 3.14]
+    env_cfg.commands.ranges.lin_vel_x = [0.0, 0.0]
+    env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
+    env_cfg.commands.ranges.ang_vel_yaw = [0, 0]
+    env_cfg.commands.ranges.heading = [0, 0]
 
     # env_cfg.init_state.pos = [0.0, 0.0, 1.2] # x,y,z [m]
     # prepare environment
@@ -155,7 +155,10 @@ def play(args):
     
     logger = Logger(env.dt)
     robot_index = 0 # which robot i s used for logging
-    joint_index = 3 # which joint is used for logging
+    joint_index_lhaa = 0 # which joint is used for logging
+    joint_index_lhfe = 1 # which joint is used for logging
+    joint_index_lkfe = 2 # which joint is used for logging
+    joint_index_rkfe = 5 # which joint is used for logging
     stop_state_log = 200 # number of steps before plotting states
     stop_rew_log = env.max_episode_length + 1 # number of steps before print average episode rewards
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
@@ -209,10 +212,13 @@ def play(args):
         if i < stop_state_log:
             logger.log_states(
                 {
-                    'dof_pos_target': actions[robot_index, joint_index].item() * env.cfg.control.action_scale,
-                    'dof_pos': env.dof_pos[robot_index, joint_index].item(),
-                    'dof_vel': env.dof_vel[robot_index, joint_index].item(),
-                    'dof_torque': env.torques[robot_index, joint_index].item(),
+                    'dof_pos_target': actions[robot_index, joint_index_lkfe].item() * env.cfg.control.action_scale,
+                    'dof_pos': env.dof_pos[robot_index, joint_index_lkfe].item(),
+                    'dof_vel_lhaa': env.dof_vel[robot_index, joint_index_lhaa].item(),
+                    'dof_vel_lhfe': env.dof_vel[robot_index, joint_index_lhfe].item(),
+                    'dof_vel_lkfe': env.dof_vel[robot_index, joint_index_lkfe].item(),
+                    'dof_vel_rkfe': env.dof_vel[robot_index, joint_index_rkfe].item(),
+                    'dof_torque': env.torques[robot_index, joint_index_lkfe].item(),
                     'command_x': env.commands[robot_index, 0].item(),
                     'command_y': env.commands[robot_index, 1].item(),
                     'command_yaw': env.commands[robot_index, 2].item(),

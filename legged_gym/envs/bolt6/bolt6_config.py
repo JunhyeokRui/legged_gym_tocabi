@@ -86,9 +86,9 @@ class Bolt6Cfg( LeggedRobotCfg ):
         heading_command = False # if true: compute ang vel command from heading error
         
         class ranges( LeggedRobotCfg.commands.ranges ):
-            lin_vel_x = [-1.0, 1.0] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
-            lin_vel_y = [-1.0, 1.0]   # min max [m/s]
-            ang_vel_yaw = [-1, 1]    # min max [rad/s]
+            lin_vel_x = [-0.8, 0.8] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
+            lin_vel_y = [-0.8, 0.8]   # min max [m/s]
+            ang_vel_yaw = [-0.8, 0.8]    # min max [rad/s]
             heading = [-3.14, 3.14]
             
 
@@ -150,6 +150,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
                     }  # [N*m*s/rad]     # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 1.0 # 0.5 in pos control
+        torque_constant = [0.22, 0.22, 0.22, 0.22, 0.22, 0.22]
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 10
 
@@ -199,8 +200,10 @@ class Bolt6Cfg( LeggedRobotCfg ):
         class scales( LeggedRobotCfg.rewards.scales ):
             termination = -100.
             # traking
-            tracking_lin_vel = 10
-            tracking_ang_vel = 10.
+            # tracking_lin_vel = 10
+            tracking_lin_vel_x = 10
+            tracking_lin_vel_y = 10
+            tracking_ang_vel = 15.
 
             # regulation in task space
             lin_vel_z = -0.
@@ -210,6 +213,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
             energy = 0.0 # 0.01
             torques = -4.e-3
             dof_vel = -0.0
+            dof_vel_high = -0
             dof_acc = -0
             action_rate = -0.0001 # -0.000001
 
@@ -222,7 +226,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
             feet_contact_forces = -0.
             
             # joint limits
-            torque_limits = -0.01
+            torque_limits = -0.00
             dof_vel_limits = -0
             dof_pos_limits = -10.
 
@@ -233,12 +237,13 @@ class Bolt6Cfg( LeggedRobotCfg ):
             base_height = 0.0
             joint_regularization = 0.0
 
-            # PBRS rewards
+            # PBRS rewardsyros
             ori_pb = 5.0
-            baseHeight_pb = 2.0
-            jointReg_pb = 1
-            energy_pb = 1.0
+            baseHeight_pb = 0.0
+            jointReg_pb = 10
+            energy_pb = -0.00
             action_rate_pb = 0.0
+            dof_vel_pb = 0.00
 
             stand_still_pb = 1.0
             no_fly_pb = 5.0
@@ -254,6 +259,8 @@ class Bolt6Cfg( LeggedRobotCfg ):
         soft_dof_pos_limit = 0.9 # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 0.9
         soft_torque_limit = 0.9
+        
+        dof_vel_limit_threshold = 15
 
         base_height_target = 0.43 # 0.43 for default position of bolt6
         max_contact_force = 300. # forces above this value are penalized
@@ -285,8 +292,8 @@ class Bolt6Cfg( LeggedRobotCfg ):
     # viewer camera:
     class viewer:
         ref_env = 0
-        pos = [10, 0, 6]  # [m]
-        lookat = [11., 5, 3.]  # [m]
+        pos = [10, 0,  6]  # [m]
+        lookat = [-10., 0, 0.]  # [m]
 
     class sim:
         dt =  0.001

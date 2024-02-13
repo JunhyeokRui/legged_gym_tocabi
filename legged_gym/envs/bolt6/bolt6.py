@@ -87,18 +87,47 @@ class Bolt6(LeggedRobot):
     def _reward_ang_vel_xy(self):
         # Penalize xy axes base angular velocity
         return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
+    
+    def _reward_dof_vel(self):
+        # Penalize dof velocities
+        return torch.sum(torch.square(self.dof_vel), dim=1)
+    
+    def _reward_dof_vel_high(self):
+        # Penalize high dof velocities over 10rad/s
+        # Compute the squared velocity differences only for velocities exceeding the threshold
+        velocity_threshold = torch.full((self.num_envs, self.num_dof), self.cfg.rewards.dof_vel_limit_threshold).to(self.device)
+
+        return torch.sum(torch.square(torch.clamp(torch.abs(self.dof_vel) - velocity_threshold, min=0)), dim=-1)  # Negate the penalty to indicate a reduction in reward
+        
+    
+    # def _reward_tracking_lin_vel(self):
+    #     # Tracking of linear velocity commands (xy axes)
+    #     lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
+    #     return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
+    
+    def _reward_tracking_lin_vel_x(self):
+        # Tracking of linear velocity commands (x axes)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, 0] - self.base_lin_vel[:, 0]), dim=-1)
+        return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
+    
+    def _reward_tracking_lin_vel_y(self):
+        # Tracking of linear velocity commands (x axes)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, 1] - self.base_lin_vel[:, 1]), dim=-1)
+        return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
 
     def _reward_energy(self):
         #veltorque, value  scale or sum
-        if self.cfg.rewards.positive_energy_reward:
-            positive_energy=(self.torques*self.dof_vel).clip(min=0.)
+        torque_constant = torch.tensor(self.cfg.control.torque_constant, device=self.device)
+        torque_constant_expanded = torque_constant.unsqueeze(0).expand(self.num_envs, -1)
+        if self.cfg.rewards.only_positive_rewards:
+            positive_energy=(self.torques * self.dof_vel + 1/torch.square(torque_constant_expanded)*(1/81)*torch.square(self.torques)).clip(min=0.)
             positive_energy_square = torch.mean(torch.square(positive_energy), dim=1)
             return torch.exp(-positive_energy_square/self.cfg.rewards.energy_sigma)
         else:
-            energy = (self.torques*self.dof_vel)
+            energy = (self.torques * self.dof_vel + 1/torch.square(torque_constant_expanded)*(1/81)*torch.square(self.torques))
             energy_square = torch.mean(torch.square(energy), dim=1)
             # print("energy_square: ", energy_square[0])
-            return torch.exp(-energy_square/self.cfg.rewards.energy_sigma)
+            return torch.exp(-energy_square / self.cfg.rewards.energy_sigma)
         
         ### sum over all columns of the square values for energy (using joint velocities)
 
@@ -138,6 +167,7 @@ class Bolt6(LeggedRobot):
         self.rwd_standStillPrev = self._reward_stand_still()
         self.rwd_noFlyPrev = self._reward_no_fly()
         self.rwd_feetAirTimePrev = self._reward_feet_air_time()
+        self.rwd_dofVelPrev = self._reward_dof_vel()
 
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
@@ -145,8 +175,6 @@ class Bolt6(LeggedRobot):
         Args:
             actions (torch.Tensor): Tensor of shape (num_envs, num_actions_per_env)
         """        
-        print("self.sim_params.dt: ", self.sim_params.dt)
-        print("self.dt: ", self.dt)
         clip_actions = self.cfg.normalization.clip_actions
         self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
         self.pre_physics_step()
@@ -206,7 +234,7 @@ class Bolt6(LeggedRobot):
             env_ids (List[int]): ids of environments being reset
         """
         # If the tracking reward is above 80% of the maximum, increase the range of commands
-        if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.70 * self.reward_scales["tracking_lin_vel"]:
+        if torch.mean(self.episode_sums["tracking_lin_vel_x"][env_ids]) / self.max_episode_length > 0.70 * self.reward_scales["tracking_lin_vel_x"]:
             self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.1, -self.cfg.commands.max_curriculum, 0.)
             self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.1, 0., self.cfg.commands.max_curriculum)
         
@@ -252,6 +280,11 @@ class Bolt6(LeggedRobot):
     def _reward_feet_air_time_pb(self):
         delta_phi = ~self.reset_buf \
             * (self._reward_feet_air_time() - self.rwd_feetAirTimePrev)
+        return delta_phi / self.dt
+    
+    def _reward_dof_vel_pb(self):
+        delta_phi = ~self.reset_buf \
+            * (self._reward_dof_vel() - self.rwd_dofVelPrev)
         return delta_phi / self.dt
     
     def check_termination(self):

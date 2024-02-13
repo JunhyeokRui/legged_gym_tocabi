@@ -57,6 +57,8 @@ runs
 # other
 *.egg-info
 __pycache__
+model_parameters/
+wandb/
 TEST.m
 policy_input.csv
 policy_input_2.csv

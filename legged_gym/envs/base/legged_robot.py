@@ -531,7 +531,6 @@ class LeggedRobot(BaseTask):
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device, requires_grad=False)
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10]) #rui -[7:10] linear velocity
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13]) #rui -[7:10] angular velocity
-        print("self.base_quat: ", self.base_quat[1, :])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec) #rui - self.gravity_vec -> 0, 0, -1
 
 #rui - for debug start
@@ -676,6 +675,8 @@ class LeggedRobot(BaseTask):
         # save body names from the asset
         body_names = self.gym.get_asset_rigid_body_names(robot_asset)
         print("body_names: \n", body_names)
+        joint_names = self.gym.get_asset_dof_names(robot_asset)
+        print("joint_names: \n", joint_names)
         self.dof_names = self.gym.get_asset_dof_names(robot_asset)
         self.num_bodies = len(body_names)
         self.num_dofs = len(self.dof_names)
