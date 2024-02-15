@@ -19,14 +19,12 @@ class Bolt6(LeggedRobot):
         self.ext_torques = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
 
     def compute_observations(self):
-        """ Computes observations
+        """ Computes observations 
         """
         self.base_z = self.root_states[:, 2].unsqueeze(1)
         self.contacts = self.contact_forces[:, self.feet_indices, 2] > 0.001
         
         self.obs_buf = torch.cat((
-            self.contacts,
-            self.base_z,
             self.base_lin_vel * self.obs_scales.lin_vel,
             self.base_ang_vel * self.obs_scales.ang_vel,
             self.projected_gravity,
@@ -92,29 +90,11 @@ class Bolt6(LeggedRobot):
         # Penalize dof velocities
         return torch.sum(torch.square(self.dof_vel), dim=1)
     
-    def _reward_dof_vel_high(self):
-        # Penalize high dof velocities over 10rad/s
-        # Compute the squared velocity differences only for velocities exceeding the threshold
-        velocity_threshold = torch.full((self.num_envs, self.num_dof), self.cfg.rewards.dof_vel_limit_threshold).to(self.device)
-
-        return torch.sum(torch.square(torch.clamp(torch.abs(self.dof_vel) - velocity_threshold, min=0)), dim=-1)  # Negate the penalty to indicate a reduction in reward
-        
-    
-    # def _reward_tracking_lin_vel(self):
-    #     # Tracking of linear velocity commands (xy axes)
-    #     lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
-    #     return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
-    
-    def _reward_tracking_lin_vel_x(self):
-        # Tracking of linear velocity commands (x axes)
-        lin_vel_error = torch.sum(torch.square(self.commands[:, 0] - self.base_lin_vel[:, 0]), dim=-1)
+    def _reward_tracking_lin_vel(self):
+        # Tracking of linear velocity commands (xy axes)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
         return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
     
-    def _reward_tracking_lin_vel_y(self):
-        # Tracking of linear velocity commands (x axes)
-        lin_vel_error = torch.sum(torch.square(self.commands[:, 1] - self.base_lin_vel[:, 1]), dim=-1)
-        return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
-
     def _reward_energy(self):
         #veltorque, value  scale or sum
         torque_constant = torch.tensor(self.cfg.control.torque_constant, device=self.device)
@@ -157,6 +137,62 @@ class Bolt6(LeggedRobot):
         # print("self.dof_pos[0, 6]: ", self.dof_pos[0, 1], "// self.dof_pos[0, 6]: ", self.dof_pos[0, 6])
         return error/2
 
+    def _reward_dof_vel_regulation(self):
+        # Penalize dof vel change
+        dof_vel_error = torch.sum(torch.square(self.dof_vel_prev - self.dof_vel), dim=1)
+        return torch.exp(-dof_vel_error/self.cfg.rewards.regulation_sigma)  # Negate the penalty to indicate a reduction in reward
+    
+    #ANCHOR - 
+        # mimic_body_orientation_reward =  0.3 * exp(-13.2*abs(baseQuatError)) 
+        # qpos_regulation = 0.35*exp(-4.0*(np.linalg.norm(target_data_qpos - qpos[7:])**2))
+        # qvel_regulation = 0.05*exp(-0.01*(np.linalg.norm(self.init_qvel[6:] - qvel[6:])**2))
+        # body_vel_reward = 0.3*exp(-3.0*(np.linalg.norm(pelvis_vel_local[0:2] - self.target_vel)**2))
+        # contact_force_penalty = 0.1*(exp(-0.0005*(np.linalg.norm(self.ft_left_foot) + np.linalg.norm(self.ft_right_foot))))
+        # torque_regulation = 0.05*exp(-0.01*(np.linalg.norm(self.action_cur)))
+        # torque_diff_regulation = 0.6*(exp(-0.01/250*(np.linalg.norm((self.action_cur - self.action_last)*(2000/self.frame_skip))))) #! 
+        # torque_diff_regulation = 0.6*(exp(-0.01*(np.linalg.norm(x=self.action_cur - self.action_last))))
+        # print("torque_diff_regulation: ", torque_diff_regulation)
+        # print("torque_diff_regulation2: ", torque_diff_regulation2)
+        # qacc_regulation = 0.05*exp(-20.0*(np.linalg.norm(self.qvel_pre - qvel[6:])**2))
+        # weight_scale = sum(self.model.body_mass[:]) / sum(self.nominal_body_mass)
+        # force_ref_reward = 0.1*exp(-0.001*(np.linalg.norm(self.ft_left_foot[2] - weight_scale*self.mocap_data[self.mocap_data_idx,34]))) \
+        #                 + 0.1*exp(-0.001*(np.linalg.norm(self.ft_right_foot[2] - weight_scale*self.mocap_data[self.mocap_data_idx,35])))
+        # double_support_force_diff_regulation = 0.0
+        # if ((self.mocap_data_idx < 300) or \
+        #     (3300 < self.mocap_data_idx and self.mocap_data_idx < 3600) or \
+        #     (1500 < self.mocap_data_idx and self.mocap_data_idx < 2100)): # Double support
+        #     if (right_foot_contact and left_foot_contact):
+        #         foot_contact_reward = 0.2
+        #     else:
+        #         foot_contact_reward = 0.0
+        #     double_support_force_diff_regulation = 0.0#0.05*exp(-0.005*(np.linalg.norm(self.ft_right_foot[2] - 0.5 * 9.81 * sum(self.model.body_mass)))) + 0.05*exp(-0.005*(np.linalg.norm(self.ft_left_foot[2] - 0.5 * 9.81 * sum(self.model.body_mass))))
+            
+        # elif (300 < self.mocap_data_idx and self.mocap_data_idx < 1500):
+        #     if (right_foot_contact and not left_foot_contact): 
+        #         foot_contact_reward = 0.2 
+        #     else:
+        #         foot_contact_reward = 0.0
+        # else:
+        #     if (not right_foot_contact and left_foot_contact):
+        #         foot_contact_reward = 0.2
+        #     else:
+        #         foot_contact_reward = 0.0
+        # contact_force_diff_regulation = 0.2*exp(-0.01/250*(np.linalg.norm((self.ft_left_foot - self.ft_left_foot_pre)*(2000/self.frame_skip)) + np.linalg.norm((self.ft_right_foot - self.ft_right_foot_pre)*(2000/self.frame_skip))))#! 
+        # # contact_force_diff_regulation = 0.2*exp(-0.01*(np.linalg.norm(self.ft_left_foot - self.ft_left_foot_pre) + np.linalg.norm(self.ft_right_foot - self.ft_right_foot_pre)))
+        # # print("contact_force_diff_regulation: ", contact_force_diff_regulation)
+        # # print("contact_force_diff_regulation2: ", contact_force_diff_regulation2)
+        # # print("|-----------------------------------------------------------------|")
+        # force_thres_penalty = 0.0
+        # if ((abs(self.ft_left_foot[2]) > 1.4 * 9.81 * sum(self.model.body_mass)) or (abs(self.ft_right_foot[2]) > 1.4 * 9.81 * sum(self.model.body_mass))):
+        #     force_thres_penalty = -0.08
+        
+        # force_diff_thres_penalty = 0.0
+        # if ((abs(self.ft_left_foot[2] - self.ft_left_foot_pre[2]) >  0.5 * 9.81 * sum(self.model.body_mass)) or (abs(self.ft_right_foot[2] - self.ft_right_foot_pre[2]) > 0.5 * 9.81 * sum(self.model.body_mass))):
+        #     force_diff_thres_penalty = -0.05
+
+        # reward = mimic_body_orientation_reward + qpos_regulation + qvel_regulation + contact_force_penalty + torque_regulation + torque_diff_regulation + qacc_regulation + body_vel_reward + foot_contact_reward + contact_force_diff_regulation + double_support_force_diff_regulation + force_thres_penalty + force_diff_thres_penalty + force_ref_reward
+    #ANCHOR - 
+
     # * Potential-based rewards * #
     def pre_physics_step(self):
         self.rwd_oriPrev = self._reward_orientation()
@@ -168,6 +204,7 @@ class Bolt6(LeggedRobot):
         self.rwd_noFlyPrev = self._reward_no_fly()
         self.rwd_feetAirTimePrev = self._reward_feet_air_time()
         self.rwd_dofVelPrev = self._reward_dof_vel()
+        self.rwd_dofVelRegPrev = self._reward_dof_vel_regulation()
 
     def step(self, actions):
         """ Apply actions, simulate, call self.post_physics_step()
@@ -234,9 +271,11 @@ class Bolt6(LeggedRobot):
             env_ids (List[int]): ids of environments being reset
         """
         # If the tracking reward is above 80% of the maximum, increase the range of commands
-        if torch.mean(self.episode_sums["tracking_lin_vel_x"][env_ids]) / self.max_episode_length > 0.70 * self.reward_scales["tracking_lin_vel_x"]:
+        if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.70 * self.reward_scales["tracking_lin_vel"]:
             self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.1, -self.cfg.commands.max_curriculum, 0.)
             self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.1, 0., self.cfg.commands.max_curriculum)
+            self.command_ranges["lin_vel_y"][0] = np.clip(self.command_ranges["lin_vel_y"][0] - 0.5, -self.cfg.commands.max_curriculum, 0.)
+            self.command_ranges["lin_vel_y"][1] = np.clip(self.command_ranges["lin_vel_y"][1] + 0.5, 0., self.cfg.commands.max_curriculum)
         
         if torch.mean(self.episode_sums["tracking_ang_vel"][env_ids]) / self.max_episode_length > 0.50 * self.reward_scales["tracking_ang_vel"]:
             self.command_ranges["ang_vel_yaw"][0] = np.clip(self.command_ranges["ang_vel_yaw"][0] - 0.05, -self.cfg.commands.max_curriculum, 0.)
@@ -285,6 +324,11 @@ class Bolt6(LeggedRobot):
     def _reward_dof_vel_pb(self):
         delta_phi = ~self.reset_buf \
             * (self._reward_dof_vel() - self.rwd_dofVelPrev)
+        return delta_phi / self.dt
+    
+    def _reward_dof_vel_regulation_pb(self):
+        delta_phi = ~self.reset_buf \
+            * (self._reward_dof_vel_regulation() - self.rwd_dofVelRegPrev)
         return delta_phi / self.dt
     
     def check_termination(self):

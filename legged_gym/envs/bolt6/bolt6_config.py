@@ -33,7 +33,7 @@ from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobot
 class Bolt6Cfg( LeggedRobotCfg ):
     class env( LeggedRobotCfg.env):
         num_envs = 4096 # robot count 4096
-        num_observations = 33
+        num_observations = 30
         '''
         self.contacts: [2]
         self.base_z: [1]
@@ -86,11 +86,10 @@ class Bolt6Cfg( LeggedRobotCfg ):
         heading_command = False # if true: compute ang vel command from heading error
         
         class ranges( LeggedRobotCfg.commands.ranges ):
-            lin_vel_x = [-0.8, 0.8] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
-            lin_vel_y = [-0.8, 0.8]   # min max [m/s]
-            ang_vel_yaw = [-0.8, 0.8]    # min max [rad/s]
+            lin_vel_x = [-0.5, 0.5] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
+            lin_vel_y = [-0.5, 0.5]   # min max [m/s]
+            ang_vel_yaw = [-0.5, 0.5]    # min max [rad/s]
             heading = [-3.14, 3.14]
-            
 
     class init_state( LeggedRobotCfg.init_state ):
         pos = [0.0, 0.0, 0.45] # x,y,z [m]
@@ -200,22 +199,19 @@ class Bolt6Cfg( LeggedRobotCfg ):
         class scales( LeggedRobotCfg.rewards.scales ):
             termination = -100.
             # traking
-            # tracking_lin_vel = 10
-            tracking_lin_vel_x = 10
-            tracking_lin_vel_y = 10
-            tracking_ang_vel = 15.
+            tracking_lin_vel = 25
+            tracking_ang_vel = 10.
 
             # regulation in task space
             lin_vel_z = -0.
             ang_vel_xy = -0.0
-            
+            dof_vel_regulation = 0
             # regulation in joint space
             energy = 0.0 # 0.01
-            torques = -4.e-3
+            torques = -4.e-5
             dof_vel = -0.0
-            dof_vel_high = -0
             dof_acc = -0
-            action_rate = -0.0001 # -0.000001
+            action_rate = -0.000001 # -0.000001
 
             # walking specific rewards
             feet_air_time = 0.
@@ -226,12 +222,10 @@ class Bolt6Cfg( LeggedRobotCfg ):
             feet_contact_forces = -0.
             
             # joint limits
-            torque_limits = -0.00
-            dof_vel_limits = -0
+            torque_limits = -0.01
+            dof_vel_limits = -1
             dof_pos_limits = -10.
 
-            
-            
             # DRS
             orientation = 0.0 # Rui
             base_height = 0.0
@@ -239,15 +233,16 @@ class Bolt6Cfg( LeggedRobotCfg ):
 
             # PBRS rewardsyros
             ori_pb = 5.0
-            baseHeight_pb = 0.0
-            jointReg_pb = 10
+            baseHeight_pb = 2.0
+            jointReg_pb = 7
             energy_pb = -0.00
-            action_rate_pb = 0.0
+            action_rate_pb = 0.00
             dof_vel_pb = 0.00
 
             stand_still_pb = 1.0
             no_fly_pb = 5.0
-            feet_air_time_pb = 1.
+            feet_air_time_pb = 1
+            dof_vel_regulation_pb = -0.00
 
         only_positive_rewards = False # if true negative total rewards are clipped at zero (avoids early termination problems)
         
@@ -255,6 +250,7 @@ class Bolt6Cfg( LeggedRobotCfg ):
         orientation_sigma = 0.25 # tracking reward = exp(-error^2/sigma)
         energy_sigma = 1e3
         action_rate_sigma = 1
+        regulation_sigma = 0.5
 
         soft_dof_pos_limit = 0.9 # percentage of urdf limits, values above this limit are penalized
         soft_dof_vel_limit = 0.9

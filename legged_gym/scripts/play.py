@@ -159,17 +159,12 @@ def play(args):
     joint_index_lhfe = 1 # which joint is used for logging
     joint_index_lkfe = 2 # which joint is used for logging
     joint_index_rkfe = 5 # which joint is used for logging
-    stop_state_log = 200 # number of steps before plotting states
+    stop_state_log = 400 # number of steps before plotting states
     stop_rew_log = env.max_episode_length + 1 # number of steps before print average episode rewards
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
     camera_vel = np.array([1., 1., 0.])
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
-    
-    
-
-    
-
     
 
 
