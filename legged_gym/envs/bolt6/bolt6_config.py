@@ -86,9 +86,9 @@ class Bolt6Cfg( LeggedRobotCfg ):
         heading_command = False # if true: compute ang vel command from heading error
         
         class ranges( LeggedRobotCfg.commands.ranges ):
-            lin_vel_x = [-0.5, 0.5] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
-            lin_vel_y = [-0.5, 0.5]   # min max [m/s]
-            ang_vel_yaw = [-0.5, 0.5]    # min max [rad/s]
+            lin_vel_x = [-1, 1] # min max [m/s] seems like less than or equal to 0.2 it sends 0 command
+            lin_vel_y = [-1, 1]   # min max [m/s]
+            ang_vel_yaw = [-1, 1]    # min max [rad/s]
             heading = [-3.14, 3.14]
 
     class init_state( LeggedRobotCfg.init_state ):
@@ -199,8 +199,8 @@ class Bolt6Cfg( LeggedRobotCfg ):
         class scales( LeggedRobotCfg.rewards.scales ):
             termination = -100.
             # traking
-            tracking_lin_vel = 25
-            tracking_ang_vel = 10.
+            tracking_lin_vel = 45
+            tracking_ang_vel = 45.
 
             # regulation in task space
             lin_vel_z = -0.
@@ -209,9 +209,9 @@ class Bolt6Cfg( LeggedRobotCfg ):
             # regulation in joint space
             energy = 0.0 # 0.01
             torques = -4.e-5
-            dof_vel = -0.0
+            dof_vel = -0.000
             dof_acc = -0
-            action_rate = -0.000001 # -0.000001
+            action_rate = -0.0005 # -0.000001
 
             # walking specific rewards
             feet_air_time = 0.
@@ -234,14 +234,14 @@ class Bolt6Cfg( LeggedRobotCfg ):
             # PBRS rewardsyros
             ori_pb = 5.0
             baseHeight_pb = 2.0
-            jointReg_pb = 7
-            energy_pb = -0.00
+            jointReg_pb = 8
+            energy_pb = 0.005
             action_rate_pb = 0.00
             dof_vel_pb = 0.00
 
             stand_still_pb = 1.0
             no_fly_pb = 5.0
-            feet_air_time_pb = 1
+            feet_air_time_pb = 1.8
             dof_vel_regulation_pb = -0.00
 
         only_positive_rewards = False # if true negative total rewards are clipped at zero (avoids early termination problems)

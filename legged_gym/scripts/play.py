@@ -80,7 +80,7 @@ def play(args):
     env_cfg.domain_rand.ext_force_duration = 0.2
 
 
-    env_cfg.commands.ranges.lin_vel_x = [-0.0, 0.0]
+    env_cfg.commands.ranges.lin_vel_x = [1.0, 1.0]
     env_cfg.commands.ranges.lin_vel_y = [0.00, 0.00]
     env_cfg.commands.ranges.ang_vel_yaw = [-0.0, -0.0]
     env_cfg.commands.ranges.heading = [0, 0]
@@ -90,10 +90,6 @@ def play(args):
     ang_vel_yaw = [-1, 1]    # min max [rad/s]
     heading = [-3.14, 3.14]
     """
-    env_cfg.commands.ranges.lin_vel_x = [0.0, 0.0]
-    env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
-    env_cfg.commands.ranges.ang_vel_yaw = [0, 0]
-    env_cfg.commands.ranges.heading = [0, 0]
 
     # env_cfg.init_state.pos = [0.0, 0.0, 1.2] # x,y,z [m]
     # prepare environment

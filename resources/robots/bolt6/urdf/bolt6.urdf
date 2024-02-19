@@ -52,7 +52,7 @@
     <parent link="base_link"/>
     <child link="FL_SHOULDER"/>
     <!-- <limit effort="2.5" lower="-0.36" upper="1.0472" velocity="50"/> -->
-    <limit effort="2.5" lower="-0.36" upper="1.0472" velocity="20"/>
+    <limit effort="2.5" lower="-0.36" upper="1.0472" velocity="15"/>
     <!-- <limit effort="18" lower="-0.36" upper="1.0472" velocity="50"/> -->
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
@@ -106,7 +106,7 @@
     <child link="FL_UPPER_LEG"/>
     <!-- <limit effort="2.5" lower="-1.57" upper="1.57" velocity="50"/> -->
     <!-- <limit effort="18" lower="-1.57" upper="1.57" velocity="50"/> -->
-    <limit effort="2.5" lower="-1.57" upper="1.57" velocity="20"/>
+    <limit effort="2.5" lower="-1.57" upper="1.57" velocity="15"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0 0.0145 -0.0386"/>
@@ -153,7 +153,7 @@
     <child link="FL_LOWER_LEG"/>
     <!-- <limit effort="1000" lower="-2.0944" upper="0" velocity="50"/> -->
     <!-- <limit effort="2.5" lower="-3.14" upper="0" velocity="50"/> -->
-    <limit effort="2.5" lower="-3.14" upper="0.0" velocity="20"/>
+    <limit effort="2.5" lower="-3.14" upper="0.0" velocity="15"/>
     <!-- <limit effort="18" lower="-3.14" upper="3.14" velocity="50"/> -->
 
     <!-- joints rotates around the y-axis -->
@@ -206,7 +206,7 @@
     <axis xyz="0 1 0"/>
     <!-- Limits (usefull?) -->
     <!-- <limit effort="2.5" lower="-1" upper="1" velocity="50"/> -->
-    <limit effort="2.5" lower="-1" upper="1" velocity="20"/>
+    <limit effort="2.5" lower="-1" upper="1" velocity="15"/>
     <!-- <limit effort="18" lower="-1" upper="1" velocity="50"/> -->
     <!-- pybullet simulation parameters -->
     <dynamics damping="0.0" friction="0.0"/>
@@ -276,7 +276,7 @@
     <parent link="base_link"/>
     <child link="FR_SHOULDER"/>
     <!-- <limit effort="2.5" lower="-1.0472" upper="0.36" velocity="50"/> -->
-    <limit effort="2.5" lower="-1.0472" upper="0.36" velocity="20"/>
+    <limit effort="2.5" lower="-1.0472" upper="0.36" velocity="15"/>
     <!-- <limit effort="18" lower="-1.0472" upper="0.36" velocity="50"/> -->
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
@@ -329,7 +329,7 @@
     <parent link="FR_SHOULDER"/>
     <child link="FR_UPPER_LEG"/>
     <!-- <limit effort="2.5" lower="-1.57" upper="1.57" velocity="50"/> -->
-    <limit effort="2.5" lower="-1.57" upper="1.57" velocity="20"/>
+    <limit effort="2.5" lower="-1.57" upper="1.57" velocity="15"/>
     <!-- <limit effort="18" lower="-1.57" upper="1.57" velocity="50"/> -->
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
@@ -377,7 +377,7 @@
     <child link="FR_LOWER_LEG"/>
     <!-- <limit effort="1000" lower="-2.0944" upper="0" velocity="50"/> -->
     <!-- <limit effort="2.5" lower="-3.14" upper="0" velocity="50"/> -->
-    <limit effort="2.5" lower="-3.14" upper="0.0" velocity="20"/>
+    <limit effort="2.5" lower="-3.14" upper="0.0" velocity="15"/>
     <!-- <limit effort="18" lower="-3.14" upper="3.14" velocity="50"/> -->
 
     <!-- joints rotates around the y-axis -->
@@ -430,7 +430,7 @@
     <axis xyz="0 1 0"/>
     <!-- Limits (usefull?) -->
     <!-- <limit effort="2.5" lower="-1" upper="1" velocity="50"/> -->
-    <limit effort="2.5" lower="-1" upper="1" velocity="20"/>
+    <limit effort="2.5" lower="-1" upper="1" velocity="15"/>
     <!-- <limit effort="18" lower="-1" upper="1" velocity="50"/> -->
     <!-- pybullet simulation parameters -->
     <dynamics damping="0.0" friction="0.0"/>
